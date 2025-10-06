@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Level Python Function Assignments</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #1a1a1a;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+        }
+        .assignment {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        details {
+            margin-top: 15px;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            color: #0056b3;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+        }
+        p strong {
+            color: #333;
+        }
+        .mega-project {
+            border: 2px solid #28a745;
+        }
+        .mega-project h2 {
+            border-bottom-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pro-Level Python Function Assignments 🚀</h1>
+    <p>Based on your notebook, here are some advanced challenges to solidify your understanding. Click on "Show Solution" to reveal the answer for each problem.</p>
+
+    <div class="assignment">
+        <h2>1. Advanced `def`: The Dynamic API Query Builder</h2>
+        <p><strong>Statement:</strong> Write a function named <code>build_api_url</code> that constructs a URL for an API request. It must accept a required <code>base_url</code>, an <code>endpoint</code>, and then any number of optional query parameters as keyword arguments (e.g., <code>api_key="abc"</code>, <code>city="New York"</code>). The function should correctly format these parameters into a URL string and handle cases where no optional parameters are given.</p>
+        <p><strong>💡 Intuition:</strong> This tests your ability to create flexible and reusable functions using <code>**kwargs</code>. Real-world functions often need to handle an unpredictable number of optional settings or parameters.</p>
+        <p><strong>🌍 Real-world Example:</strong> You are building a Python client to interact with a weather API. The user might want to query by city, zip code, or coordinates. Your function can handle all these combinations without needing to be rewritten.</p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+import urllib.parse
+
+def build_api_url(base_url, endpoint, **params):
+    """
+    Constructs a full API URL from a base, an endpoint, and optional query parameters.
+    
+    Args:
+        base_url (str): The base URL of the API (e.g., 'https://api.weather.com').
+        endpoint (str): The specific API endpoint (e.g., '/v3/weather/forecast').
+        **params: Arbitrary keyword arguments for query parameters.
+    
+    Returns:
+        str: The fully constructed and encoded URL.
+    """
+    # Combine base and endpoint, ensuring no double slashes
+    url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+    
+    if params:
+        # urlencode handles special characters and formatting
+        query_string = urllib.parse.urlencode(params)
+        return f"{url}?{query_string}"
+    
+    return url
+
+# --- Example Usage ---
+base = 'https://api.example.com'
+ep = 'v1/data'
+
+# 1. Call with no optional params
+url1 = build_api_url(base, ep)
+print(f"URL 1: {url1}")
+
+# 2. Call with multiple optional params
+url2 = build_api_url(base, ep, search="python functions", limit=10, format="json")
+print(f"URL 2: {url2}")
+
+# Expected Output:
+# URL 1: https://api.example.com/v1/data
+# URL 2: https://api.example.com/v1/data?search=python+functions&limit=10&format=json
+            </code></pre>
+        </details>
+    </div>
+
+    <div class="assignment">
+        <h2>2. Scope & Namespaces: The Caching Decorator</h2>
+        <p><strong>Statement:</strong> Write a decorator function called <code>cache_results</code>. This decorator should store the result of a function call and return the cached result if the same function is called again with the exact same arguments, avoiding re-computation. The cache should be stored within the decorator's scope.</p>
+        <p><strong>💡 Intuition:</strong> This is a powerful real-world application of closures. The inner wrapper function has access to the <code>cache</code> dictionary defined in the outer decorator function's scope, allowing it to "remember" results across calls.</p>
+        <p><strong>🌍 Real-world Example:</strong> Imagine a function <code>get_data_from_database(query)</code> that is very slow. If you call it multiple times with the same query, you're wasting time. A caching decorator can make the application dramatically faster by fetching the result from memory on the second call instead of from the database.</p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+import time
+
+def cache_results(func):
+    """A decorator to cache function results."""
+    cache = {}  # This dictionary is part of the closure's scope
+    
+    def wrapper(*args, **kwargs):
+        # Create a unique key for the given arguments
+        # We convert kwargs to a frozenset of items to make it hashable
+        key = (args, frozenset(kwargs.items()))
+        
+        if key not in cache:
+            print(f"Cache miss! Running {func.__name__}...")
+            cache[key] = func(*args, **kwargs)
+        else:
+            print(f"Cache hit! Returning stored result for {func.__name__}.")
+            
+        return cache[key]
+        
+    return wrapper
+
+@cache_results
+def slow_fetch(user_id, from_db=True):
+    """A simulated slow function."""
+    time.sleep(2) # Simulate a slow network or DB call
+    return f"Data for user {user_id}"
+
+# --- Example Usage ---
+print("First call:")
+print(slow_fetch(101))
+print("-" * 20)
+
+print("Second call (should be instant):")
+print(slow_fetch(101))
+print("-" * 20)
+
+print("Third call (different args, should be slow):")
+print(slow_fetch(202))
+
+# Expected Output:
+# First call:
+# Cache miss! Running slow_fetch...
+# Data for user 101
+# --------------------
+# Second call (should be instant):
+# Cache hit! Returning stored result for slow_fetch.
+# Data for user 101
+# --------------------
+# Third call (different args, should be slow):
+# Cache miss! Running slow_fetch...
+# Data for user 202
+            </code></pre>
+        </details>
+    </div>
+
+    <div class="assignment">
+        <h2>3. Returning Multiple Values: The Data Validation Report</h2>
+        <p><strong>Statement:</strong> Write a function <code>validate_dataframe_columns</code> that takes a list of dictionaries (like a simplified DataFrame) and a dictionary of expected data types (e.g., <code>{'name': str, 'age': int, 'score': float}</code>). The function should check each row. It must return three values: a boolean indicating if the entire dataset is valid, a list of cleaned/validated rows, and a dictionary containing error reports (e.g., <code>{'row_2': 'age should be int'}</code>).</p>
+        <p><strong>💡 Intuition:</strong> This pattern is superior to just returning <code>True</code> or <code>False</code>. By returning multiple, distinct pieces of information (status, clean data, and errors), you give the calling code everything it needs to proceed intelligently.</p>
+        <p><strong>🌍 Real-world Example:</strong> Before ingesting a user-uploaded CSV file into a database, you must validate it. This function would not only tell you *if* the file is good but also provide the cleaned data ready for insertion and a detailed error report to show the user what they need to fix.</p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+def validate_dataframe_columns(data, column_types):
+    """
+    Validates data types for a list of dictionaries.
+
+    Returns:
+        tuple: (is_fully_valid, cleaned_data, error_report)
+    """
+    cleaned_data = []
+    error_report = {}
+    is_fully_valid = True
+    
+    for i, row in enumerate(data):
+        clean_row = {}
+        row_is_valid = True
+        for col, expected_type in column_types.items():
+            value = row.get(col)
+            if value is None or not isinstance(value, expected_type):
+                error_key = f"row_{i}"
+                error_report[error_key] = f"Column '{col}' has wrong type. Expected {expected_type.__name__}."
+                is_fully_valid = False
+                row_is_valid = False
+                break # Move to the next row on first error
+            clean_row[col] = value
+        
+        if row_is_valid:
+            cleaned_data.append(clean_row)
+            
+    return is_fully_valid, cleaned_data, error_report
+
+# --- Example Usage ---
+dataset = [
+    {'name': 'Alice', 'age': 30, 'score': 88.5},
+    {'name': 'Bob', 'age': '25', 'score': 91.0}, # age is a string (error)
+    {'name': 'Charlie', 'age': 35, 'score': None} # score has wrong type
+]
+
+schema = {'name': str, 'age': int, 'score': float}
+
+is_valid, clean_rows, errors = validate_dataframe_columns(dataset, schema)
+
+print(f"Dataset is fully valid: {is_valid}")
+print(f"Cleaned Rows: {clean_rows}")
+print(f"Error Report: {errors}")
+
+# Expected Output:
+# Dataset is fully valid: False
+# Cleaned Rows: [{'name': 'Alice', 'age': 30, 'score': 88.5}]
+# Error Report: {'row_1': "Column 'age' has wrong type. Expected int.", 'row_2': "Column 'score' has wrong type. Expected float."}
+            </code></pre>
+        </details>
+    </div>
+
+    <div class="assignment">
+        <h2>4. Functions as Objects: The Configurable Data Processor</h2>
+        <p><strong>Statement:</strong> Write a function <code>process_data(data, operations)</code> where <code>data</code> is a list of numbers and <code>operations</code> is a list of function objects. The <code>process_data</code> function should apply each operation sequentially to the entire list of data and return the final transformed list. Create a few simple transformation functions (e.g., <code>remove_negatives</code>, <code>double_values</code>, <code>add_five</code>) to test your processor.</p>
+        <p><strong>💡 Intuition:</strong> This treats "what to do" (the operations) as data itself. You can change the entire behavior of your program by simply changing the list of functions you pass in, without ever touching the core <code>process_data</code> logic. This is a very powerful and flexible design pattern.</p>
+        <p><strong>🌍 Real-world Example:</strong> In image processing, a user might want to apply a series of filters to an image: 1. Convert to grayscale, 2. Increase contrast, 3. Apply a blur. Instead of a rigid function, you can have a pipeline that accepts a list of filter functions <code>[to_grayscale, increase_contrast, apply_blur]</code> and applies them in order.</p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+# --- Step 1: Define some operation functions ---
+def remove_negatives(numbers):
+    return [n for n in numbers if n >= 0]
+
+def double_values(numbers):
+    return [n * 2 for n in numbers]
+
+def add_five(numbers):
+    return [n + 5 for n in numbers]
+
+# --- Step 2: Define the main processor function ---
+def process_data(data, operations):
+    """
+    Applies a list of function objects sequentially to a list of data.
+    """
+    current_data = data
+    for op_func in operations:
+        print(f"Applying function: {op_func.__name__}")
+        current_data = op_func(current_data)
+        print(f"  -> Result: {current_data}")
+    return current_data
+
+# --- Step 3: Use the processor with different pipelines ---
+initial_data = [1, 5, -3, 10, -2]
+print(f"Initial Data: {initial_data}\n")
+
+# Pipeline 1: Clean and then double
+print("--- Pipeline 1: Remove Negatives -> Double Values ---")
+pipeline1 = [remove_negatives, double_values]
+final_result1 = process_data(list(initial_data), pipeline1)
+print(f"\nFinal Result 1: {final_result1}\n")
+
+# Pipeline 2: A different order of operations
+print("--- Pipeline 2: Add Five -> Remove Negatives ---")
+pipeline2 = [add_five, remove_negatives]
+final_result2 = process_data(list(initial_data), pipeline2)
+print(f"\nFinal Result 2: {final_result2}")
+
+# Expected Output:
+# Initial Data: [1, 5, -3, 10, -2]
+#
+# --- Pipeline 1: Remove Negatives -> Double Values ---
+# Applying function: remove_negatives
+#   -> Result: [1, 5, 10]
+# Applying function: double_values
+#   -> Result: [2, 10, 20]
+#
+# Final Result 1: [2, 10, 20]
+#
+# --- Pipeline 2: Add Five -> Remove Negatives ---
+# Applying function: add_five
+#   -> Result: [6, 10, 2, 15, 3]
+# Applying function: remove_negatives
+#   -> Result: [6, 10, 2, 15, 3]
+#
+# Final Result 2: [6, 10, 2, 15, 3]
+            </code></pre>
+        </details>
+    </div>
+
+    <div class="assignment">
+        <h2>5. Anonymous (Lambda) Functions: Conditional Filtering and Mapping</h2>
+        <p><strong>Statement:</strong> You have a list of sensor readings: <code>readings = [('sensor_a', 22.5), ('sensor_b', 19.8), ('sensor_c', 28.1), ('sensor_a', 23.1)]</code>. Use a combination of <code>filter()</code> and <code>map()</code> with lambda functions in a single expression to get a list of all temperatures from 'sensor_a' converted to Fahrenheit. The formula for Celsius to Fahrenheit is $F = C \times \frac{9}{5} + 32$.</p>
+        <p><strong>💡 Intuition:</strong> This challenges you to chain higher-order functions together, each with a concise lambda. It demonstrates how lambdas allow you to define simple, throwaway logic exactly where it's needed, leading to highly expressive, one-line data transformations.</p>
+        <p><strong>🌍 Real-world Example:</strong> You're streaming financial data and want to quickly calculate the total value of all "BUY" orders that are greater than $10,000. You can use <code>filter()</code> with a lambda to select the right orders and then <code>map()</code> with another lambda to extract their value, followed by <code>sum()</code>.</p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+readings = [
+    ('sensor_a', 22.5), 
+    ('sensor_b', 19.8), 
+    ('sensor_c', 28.1), 
+    ('sensor_a', 23.1)
+]
+
+# One-line solution using filter and map with lambdas
+fahrenheit_readings_a = list(
+    map(lambda reading: (reading[0], reading[1] * 9/5 + 32), 
+        filter(lambda reading: reading[0] == 'sensor_a', readings)
+    )
+)
+
+print(f"Fahrenheit readings from sensor_a: {fahrenheit_readings_a}")
+
+# Let's break it down to see the steps:
+# 1. Filter for 'sensor_a'
+sensor_a_only = list(filter(lambda r: r[0] == 'sensor_a', readings))
+# -> [('sensor_a', 22.5), ('sensor_a', 23.1)]
+
+# 2. Map the conversion function onto the filtered results
+celsius_values = map(lambda r: r[1], sensor_a_only)
+fahrenheit_values = list(map(lambda c: c * 9/5 + 32, celsius_values))
+# -> [72.5, 73.58]
+
+# Expected Output:
+# Fahrenheit readings from sensor_a: [('sensor_a', 72.5), ('sensor_a', 73.58000000000001)]
+# (Note: Floating point precision might vary slightly)
+            </code></pre>
+        </details>
+    </div>
+
+    <div class="assignment mega-project">
+        <h2>🏆 Mega Project: The Mini Data Processing Pipeline</h2>
+        <p><strong>Scenario:</strong> You've been given a block of raw text representing sales records. It's messy and needs to be cleaned, processed, and summarized. Your task is to build a script that does this by combining all the function concepts you've learned.</p>
+        <p><strong>Statement:</strong>
+            <ol>
+                <li>Create a set of small, single-purpose cleaning functions (e.g., one to remove '$', one to strip whitespace, one to convert to title case).</li>
+                <li>Write a main function <code>run_pipeline(raw_data)</code>. This function should:
+                    <ul>
+                        <li>Define a processing "pipeline" as a list containing your cleaning function objects.</li>
+                        <li>Split the raw data string into individual lines.</li>
+                        <li>For each line, attempt to parse it into (product, quantity, price). Use a <code>try-except</code> block to catch errors (like non-numeric values) and count how many lines are skipped.</li>
+                        <li>Apply the cleaning pipeline to the product name.</li>
+                        <li>Calculate the total sale for that line (quantity * price).</li>
+                        <li>Store the clean data (e.g., in a list of dictionaries).</li>
+                        <li>The function should return multiple values: the final list of clean sales records, the total revenue, and the number of skipped lines.</li>
+                    </ul>
+                </li>
+                <li>After calling <code>run_pipeline</code>, use the returned data to print a summary report. The report should show the total revenue, the number of processed vs. skipped lines, and a list of the top 3 sales, sorted in descending order by their total sale amount (use <code>sorted</code> with a <code>lambda</code> for this).</li>
+            </ol>
+        </p>
+        <details>
+            <summary>Show Solution</summary>
+            <pre><code>
+import re
+
+# --- Step 1: Define Cleaning Functions (Functions as Objects) ---
+def clean_whitespace(text):
+    return text.strip()
+
+def clean_symbols(text):
+    return re.sub(r'[\$\*!]', '', text)
+
+def to_title_case(text):
+    return text.title()
+
+# --- Step 2: The Main Pipeline Function (def, Returning Multiple Values) ---
+def run_pipeline(raw_data):
+    # This is our list of function objects
+    cleaning_pipeline = [clean_whitespace, clean_symbols, to_title_case]
+    
+    lines = raw_data.strip().split('\\n')
+    processed_records = []
+    skipped_lines = 0
+    total_revenue = 0.0
+
+    for line in lines:
+        try:
+            product_raw, qty_str, price_str = line.split(',')
+            
+            # Apply the cleaning pipeline to the product name
+            product_clean = product_raw
+            for clean_func in cleaning_pipeline:
+                product_clean = clean_func(product_clean)
+
+            # Convert to numbers
+            quantity = int(qty_str.strip())
+            price = float(clean_symbols(price_str.strip()))
+            
+            total_sale = quantity * price
+            
+            processed_records.append({
+                'product': product_clean,
+                'quantity': quantity,
+                'price': price,
+                'total_sale': total_sale
+            })
+            total_revenue += total_sale
+
+        except (ValueError, IndexError):
+            # Catches lines with wrong format or non-numeric data
+            skipped_lines += 1
+            continue
+
+    return processed_records, total_revenue, skipped_lines
+
+# --- Step 3: Run and Report (Lambda Functions) ---
+
+# Here's our messy input data
+RAW_SALES_DATA = """
+  *MacBook Pro* , 2, $1200.50
+!!iPhone 15!!, 5, $999.00
+    monitor stand, 10, $49.99
+    , 1, 100.00  // Bad line: missing product
+webcam, three, $75.00 // Bad line: quantity is not a number
+USB-C Cable, 25, $12.00!
+"""
+
+# Call the main function and unpack the results
+clean_data, revenue, skipped = run_pipeline(RAW_SALES_DATA)
+
+# Sort the data to find the top sales using a lambda function
+top_3_sales = sorted(clean_data, key=lambda record: record['total_sale'], reverse=True)[:3]
+
+# Print the final report
+print("--- Sales Processing Report ---")
+print(f"Total Revenue: ${revenue:.2f}")
+print(f"Successfully Processed Records: {len(clean_data)}")
+print(f"Skipped (Malformed) Lines: {skipped}")
+print("\\n--- Top 3 Sales ---")
+for i, sale in enumerate(top_3_sales, 1):
+    print(
+        f"{i}. Product: {sale['product']}, "
+        f"Total Sale: ${sale['total_sale']:.2f}"
+    )
+
+# Expected Output:
+# --- Sales Processing Report ---
+# Total Revenue: $7795.49
+# Successfully Processed Records: 4
+# Skipped (Malformed) Lines: 2
+#
+# --- Top 3 Sales ---
+# 1. Product: Iphone 15, Total Sale: $4995.00
+# 2. Product: Macbook Pro, Total Sale: $2401.00
+# 3. Product: Monitor Stand, Total Sale: $499.90
+
+            </code></pre>
+        </details>
+    </div>
+
+</body>
+</html>
