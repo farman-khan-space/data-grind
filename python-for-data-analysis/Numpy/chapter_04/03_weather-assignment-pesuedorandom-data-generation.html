@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumPy Project: Simulating Climate Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        details > summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        .task-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto px-4 py-12">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-2">NumPy Simulation Project</h1>
+            <p class="text-xl text-slate-600">Random Data Generation & Universal Functions</p>
+        </header>
+
+        <!-- Case Study Section -->
+        <div class="bg-white rounded-lg p-8 mb-12 shadow-lg border border-slate-200">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Case Study: New York City Climate Model</h2>
+            <p class="text-slate-700 leading-relaxed">
+                You're working with a team of climate scientists studying weather patterns in New York City. They need to test their analysis software, but they are waiting for the complete, cleaned dataset from the meteorological department.
+            </p>
+            <p class="mt-4 text-slate-700 leading-relaxed">
+                To avoid delays, your task is to **simulate a year's worth of weather data**. You'll generate realistic-looking temperature data, clean it up, transform it, and perform some initial analysis. This project will heavily rely on your skills with NumPy's random number generator and its powerful Universal Functions (ufuncs).
+            </p>
+        </div>
+
+        <!-- Intuition & Learning Section -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-8 mb-12">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6">Learning: Core Intuitions</h2>
+            
+            <div class="mb-8">
+                <h3 class="text-2xl font-semibold mb-3">What is Pseudorandom? (And Why "Seed" is Important)</h3>
+                <p class="mb-4">You're right, the book is brief here. Let's use an analogy: a deck of cards.</p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10140;</span>
+                        <div><strong>No Seed (True Randomness)</strong>: Every time you run your code, it's like getting a brand new, perfectly shuffled deck of cards. The sequence of cards you draw is unpredictable. This is what happens if you don't use `np.random.seed()`.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10140;</span>
+                        <div><strong>Using a Seed (Pseudorandom)</strong>: The seed is like a secret number that arranges the deck in a specific, known order *before* shuffling. For example, `seed(123)` might mean "arrange all the hearts first, then spades...". The shuffling algorithm itself is deterministic (not random). So, if you and I both use the same seed (the same arrangement) and the same shuffle, we will get the **exact same sequence of "random" cards**.</div>
+                    </li>
+                </ul>
+                <p class="mt-4 font-semibold text-blue-700">This is why we use it: for <span class="bg-blue-200 px-2 py-1 rounded">reproducibility</span>. It guarantees that your "random" data is the same every time you run the script, which is essential for testing and sharing your work.</p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-semibold mb-3">What are Universal Functions (ufuncs)?</h3>
+                <p class="mb-4">Think of ufuncs as super-charged math operations designed specifically for NumPy arrays.</p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                         <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10140;</span>
+                        <div><strong>The Slow Way (Python `for` loop)</strong>: This is like using a basic calculator. To add 1 to a million numbers, you have to punch in `number + 1`, press equals, write it down, and repeat a million times. It's slow because Python is checking types and handling things one by one.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10140;</span>
+                        <div><strong>The Fast Way (NumPy ufunc)</strong>: This is like a spreadsheet formula. You tell NumPy, "take this entire array of a million numbers and add 1 to all of them." NumPy then uses its highly optimized, low-level code (written in C) to perform the operation on the entire block of memory at once. It's thousands of times faster. `np.sqrt()`, `np.exp()`, and even basic math like `+` and `*` on arrays are all ufuncs.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Assignments Section -->
+        <div>
+            <h2 class="text-3xl font-bold mb-8 text-center text-blue-600">Your Simulation Challenge</h2>
+            <div class="space-y-8">
+
+                <!-- Task 1 -->
+                <div class="task-card bg-white rounded-lg p-6 shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold text-blue-700 mb-3">1. Generate the Temperature Data</h3>
+                    <p class="text-slate-500 mb-4">Let's simulate one year (365 days) of average daily temperatures. We'll assume the average temperature follows a normal (Gaussian) distribution. For NYC, let's use a mean temperature of 13°C and a standard deviation of 8°C.</p>
+                    <div class="bg-slate-100 rounded-md p-4">
+                        <code class="font-mono text-sm text-slate-700">
+                            # 1. First, set the random seed to 42 for reproducibility.<br>
+                            # 2. Use `np.random.normal()` to generate 365 temperatures.<br>
+                            #    - `loc` (mean) = 13<br>
+                            #    - `scale` (std dev) = 8<br>
+                            #    - `size` = 365<br>
+                            # 3. Store this in an array called `temperatures_celsius`.<br>
+                            # 4. Print the first 5 values.
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="task-card bg-white rounded-lg p-6 shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold text-blue-700 mb-3">2. Clean the Data with `np.where`</h3>
+                    <p class="text-slate-500 mb-4">Due to a simulated sensor glitch and natural weather patterns, some impossible/extreme temperatures (below 0°C) might have been generated. Your task is to clean these by setting a floor value. `np.where` is a vectorized version of an `if/else` statement and is perfect for this.</p>
+                    <div class="bg-slate-100 rounded-md p-4">
+                        <code class="font-mono text-sm text-slate-700">
+                           # 1. Use `np.where(condition, value_if_true, value_if_false)`.<br>
+                           # 2. The condition should be `temperatures_celsius < 0`.<br>
+                           # 3. If the condition is true, replace the value with 0 (a floor value).<br>
+                           # 4. If false, keep the original value.<br>
+                           # 5. Store the result back in `temperatures_celsius` and print the `.min()` to verify.
+                        </code>
+                    </div>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="task-card bg-white rounded-lg p-6 shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold text-blue-700 mb-3">3. Convert to Fahrenheit (Unary ufuncs)</h3>
+                    <p class="text-slate-500 mb-4">The international team prefers Fahrenheit. Convert the entire Celsius array using the formula: `F = C * 9/5 + 32`. This is a classic use of element-wise arithmetic ufuncs.</p>
+                    <div class="bg-slate-100 rounded-md p-4">
+                        <code class="font-mono text-sm text-slate-700">
+                            # 1. Apply the conversion formula directly to the `temperatures_celsius` array.<br>
+                            # 2. Store the result in a new array called `temperatures_fahrenheit`.<br>
+                            # 3. Print the first 5 values of the new Fahrenheit array.
+                        </code>
+                    </div>
+                </div>
+                 <!-- Task 4 -->
+                <div class="task-card bg-white rounded-lg p-6 shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold text-blue-700 mb-3">4. Calculate Heat Index (Binary ufuncs)</h3>
+                    <p class="text-slate-500 mb-4">Heat index combines temperature and humidity. Let's simulate humidity and calculate a simplified heat index. This requires operations between two separate arrays.</p>
+                    <div class="bg-slate-100 rounded-md p-4">
+                        <code class="font-mono text-sm text-slate-700">
+                           # 1. Generate 365 humidity values using `np.random.uniform(low=0.4, high=0.9, size=365)`. Store in `humidity`.<br>
+                           # 2. Calculate a simplified heat index: `heat_index = temperatures_fahrenheit + (humidity * 10)`.<br>
+                           # 3. Some days might be extra hot. Use `np.maximum()` to ensure no heat index value is below the actual Fahrenheit temperature. Compare `heat_index` and `temperatures_fahrenheit` and store the result back in `heat_index`.<br>
+                           # 4. Print the first 5 heat index values.
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solutions Section -->
+        <div class="text-center mt-12">
+             <details class="group">
+                <summary class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-transform duration-200 group-hover:scale-105">
+                    Show/Hide Solutions
+                </summary>
+                <div class="mt-8 text-left bg-white border border-slate-200 rounded-lg p-6 shadow-inner">
+                    <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">Solutions</h2>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-lg mb-2 text-blue-700">1. Generate Temperature Data</h3>
+                        <div class="solution-block rounded-md p-4 font-mono text-sm"><pre><code>import numpy as np
+# 1. Set the seed
+np.random.seed(42)
+
+# 2. Generate the data
+temperatures_celsius = np.random.normal(loc=13, scale=8, size=365)
+
+# 3. Print the first 5 values
+print(temperatures_celsius[:5])
+# Expected output: [16.9737  8.5816 18.7854 25.3588 11.9069]
+</code></pre></div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-lg mb-2 text-blue-700">2. Clean the Data with `np.where`</h3>
+                        <div class="solution-block rounded-md p-4 font-mono text-sm"><pre><code># The np.where function acts on the whole array at once.
+temperatures_celsius = np.where(temperatures_celsius < 0, 0, temperatures_celsius)
+
+# Verify by checking the minimum value
+print(f"Minimum temperature after cleaning: {temperatures_celsius.min():.4f}°C")
+# Expected output: Minimum temperature after cleaning: 0.0000°C
+</code></pre></div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-lg mb-2 text-blue-700">3. Convert to Fahrenheit</h3>
+                        <div class="solution-block rounded-md p-4 font-mono text-sm"><pre><code># The formula is applied element-wise to the entire array.
+temperatures_fahrenheit = temperatures_celsius * (9/5) + 32
+
+print(temperatures_fahrenheit[:5])
+# Expected output: [62.5526 47.4469 65.8138 77.6458 53.4325]
+</code></pre></div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2 text-blue-700">4. Calculate Heat Index</h3>
+                        <div class="solution-block rounded-md p-4 font-mono text-sm"><pre><code># Ensure you use the same seed to get the same humidity values
+np.random.seed(42)
+humidity = np.random.uniform(low=0.4, high=0.9, size=365)
+
+# Calculate the initial heat index
+heat_index = temperatures_fahrenheit + (humidity * 10)
+
+# Use the binary ufunc np.maximum to compare two arrays element-wise
+heat_index = np.maximum(heat_index, temperatures_fahrenheit)
+
+print(heat_index[:5])
+# Expected output: [69.5063 52.2198 72.3094 85.3894 60.8819]
+</code></pre></div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+</body>
+</html>
